@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head></head><body>
+  
+     
+    
+    
+    
+    
+    
+  
+  
+
+
+<h1>Ada Programming Assignment<br/><br/></h1>
+<h2>Due <u>Monday, October 11 at 11:55pm</u></h2>
+<br/>
+Please compress your code files into a zip file and upload it to the course website on Brightspace.
+<br/><br/>
+The sections of the <a rel="noopener" href="https://dwheeler.com/lovelace/master.htm">Lovelace Ada tutorial</a>
+that you will find the most relevant are:
+<ul> 
+<li> <a rel="noopener" href="https://dwheeler.com/lovelace/lesson2.htm">Lesson 2 - Basic Ada Structure (Packages)</a>
+</li><li>  <a rel="noopener" href="https://dwheeler.com/lovelace/lesson13.htm">Lesson 13 - Tasks and Protected Types</a>
+</li></ul>
+However, since you will need to declare types, implement procedures, etc., you should be sure to go through at least the following additional lessons in the Lovelace tutorial: 1, 2, 3, 4, 5, 6, 8, 9.
+<br/><br/>
+Also, be sure to review the sample Ada programs that I have provided under &quot;Ada Resources&quot; in the course page (also <a rel="noopener" href="http://cs.nyu.edu/courses/fall21/CSCI-GA.2110-001/ada_programs/">here</a>).
+<br/><br/>
+<u><b>Assignment</b></u><br/>
+You will be implementing a program for reading in, sorting, summing, and printing an array of numbers, using concurrency.
+<br/><br/>
+Your program should consist of three files: MainProg.adb, Sorting.ads, and Sorting.adb as follows.
+<br/><br/>
+<u>MainProg.adb</u><br/><br/>
+
+In the file MainProg.adb, write a procedure <tt>MainProg</tt> that performs the following.
+
+<ul>   
+<li>Read in 40 numbers into an array. Each number is an integer
+between 0 and 500, inclusive. You should use a subtype of integer as the element
+  type of the array to enforce this restriction.  Use Ada&#39;s <tt>Get</tt> procedure, as seen
+  in the sample Ada programs, to read the numbers in from the standard input (the terminal).
+  Do not read the numbes in from a file.
+<br/><br/>
+
+</li><li>
+Create three tasks, <tt>PrintingTask</tt>, <tt>SortingTask</tt> and 
+<tt>AddingTask</tt>, 
+that run concurrently once the numbers have been read into the array.
+These tasks perform the followng actions:
+<ul>
+
+<br/>
+<li><tt> PrintingTask</tt>:
+<ul>
+<li>First print out the elements of the array.
+
+</li><li>Notify <tt>SortingTask</tt> that the numbers have been
+printed.
+
+</li><li>Wait for notification from <tt>SortingTask</tt> that it
+is finished.
+
+</li><li>Print out the elements of the array again.
+
+</li><li>Wait to receive a value from <tt>AddingTask</tt>
+
+</li><li>Print the value received from <tt>AddingTask</tt>
+</li></ul>
+
+<br/>
+</li><li>
+<tt>AddingTask</tt>:
+<ul>
+
+<li> Wait for notification that <tt>SortingTask</tt>
+is finished.
+
+</li><li>Compute the sum of the elements of the sorted array.
+
+</li><li>Send the result to <tt>PrintingTask</tt>.
+</li></ul>
+
+<br/>
+</li><li>
+<tt>SortingTask</tt>:
+<ul>
+<li>Wait for notification that <tt>PrintingTask</tt>
+has printed the elements of the array.
+
+</li><li>Sort the array according to the parallel 
+quicksort algorithm described below.
+
+</li><li>Notify both <tt>PrintingTask</tt> and <tt>AddingTask</tt> that the
+array is sorted.
+</li></ul>
+</li></ul>
+</li></ul>
+
+<br/><br/>
+<u>Sorting.ads</u> and <u>Sorting.adb</u><br/><br/>
+
+In a separate package called <tt>Sorting</tt>, whose specification is
+in the file Sorting.ads and whose body is in the file Sorting.adb, define
+the procedure <tt>QSort(Low,High)</tt> for sorting those elements
+of the above array between the <tt>Low</tt>&#39;th element and the
+<tt>High</tt>&#39;th element, inclusive.
+
+<br/><br/>
+
+In <tt>Sorting.ads</tt>, the <tt>Sorting</tt> package specification, you should
+declare the following:
+<ul>
+  <li> A constant <tt>SIZE</tt> that specifies the size of the array, namely 40. Elsewhere
+    in your program, <tt>SIZE</tt> should be used, not 40, so that the size of the array
+    can easily be changed without having to modify any other part of your program.
+  </li><li> The type of the array, which must restrict the elements to be integers between 0
+    and 500.
+  </li><li> The array itself. By declaring the array in the package specification, it can be
+    referenced within the tasks in MainProg as well as shared among the various calls to
+    the <tt>QSort</tt> procedure.  This allows <tt>QSort</tt> to take only 
+    <tt>Low</tt> and <tt>High</tt> as parameters, and not the array.
+  </li><li> The <tt>QSort</tt> procedure.
+</li></ul>
+
+
+The <tt>QSort</tt> procedure should be implemented in <tt>Sorting.adb</tt>. The quicksort algorithm
+can be described as follows (assuming the array is called <tt>A</tt>).
+<ul>
+<br/>
+<li>If <tt>Low</tt> is greater than or equal to <tt>High</tt>, then return.
+
+<br/><br/>
+</li><li>Otherwise, apply the routine <tt>Split</tt> to <tt>A</tt> as follows:
+<ul>
+<li>Declare a variable <tt>M</tt> and set it to the median value of the <tt>A(Low)</tt>,
+<tt>A(High)</tt>, and <tt>A((Low+High)/2)</tt>. If there are only two elements of
+<tt>A</tt> then assign to <tt>M</tt> the smaller of the two values.
+</li><li>
+Declare two variables <tt>I</tt> and <tt>J</tt>, setting <tt>I</tt> to <tt>Low</tt>
+and <tt>J</tt> to <tt>High</tt>.
+
+</li><li>
+In a loop, as long as <tt>I</tt> is less than <tt>J</tt>, perform the following steps:
+<ul>  
+<li>
+While <tt>A(I)</tt> is less than or equal to <tt>M</tt>, increment <tt>I</tt>.
+</li><li> 
+While <tt>A(J)</tt> is greater than <tt>M</tt>, decrement <tt>J</tt>.
+</li><li>
+If <tt>I</tt> is less than <tt>J</tt>, exchange the values of <tt>A(I)</tt> and <tt>A(J)</tt>.
+</li></ul>
+Make sure that <tt>I</tt> never becomes greater than <tt>J</tt>.
+</li></ul> 
+
+<br/>
+</li><li> 
+At this point, the array <tt>A</tt> (between the Low and High elements, inclusive) has been
+split into two parts. The first part of <tt>A</tt>
+contains only numbers less than or equal to <tt>M</tt> and the second part of
+<tt>A</tt> contains only numbers greater than <tt>M</tt>.  Call <tt>QSort</tt>
+recursively on each of the two parts.  The two recursive calls should
+occur <u>concurrently</u> and should share the array. 
+</li></ul> 
+<br/>
+Notice that by concurrently calling <tt>QSort</tt> recursively,
+you will end up with many tasks executing concurrently.
+<br/>
+
+
+<br/><br/>
+
+I recommend that you develop your program using the following steps:
+<ol>
+  <li> In the <tt>Sorting.ads</tt> file, declare <tt>SIZE</tt>, the array type, the array, and
+    the <tt>QSort</tt> procedure.
+  </li><li> In the <tt>Sorting.adb</tt> file, define a dummy version of <tt>Qsort</tt> that doesn&#39;t
+    do anything.
+   </li><li> In the <tt>MainProg.adb</tt> file, write and debug a procedure that reads
+     in values into the array. Also write and debug a procedure that prints out the values of the
+     array. The main procedure <tt>MainProg</tt> should call these two functions.
+   </li><li> In the <tt>Sorting.adb</tt> file, write and debug a sequential (non-concurrent) version of
+     <tt>QSort</tt>, replacing the dummy version. Call <tt>QSort</tt> from <tt>MainProg</tt>.
+     </li><li> Write and debug the tasks (<tt>PrintingTask</tt>, <tt>SortingTask</tt> and 
+       <tt>AddingTask</tt>) within <tt>MainProg</tt>.  <tt>SortingTask</tt>, of course, will
+       be calling the sequential version of <tt>QSort</tt> at this point.
+     </li><li> Modify the sequential version of <tt>QSort</tt> to make it concurrent, as specified
+       above, and debug it.
+  </li></ol>
+
+<b><u>Important:</u> You must write all of the code yourself, without getting any code from the
+Web, from another student, or any other source. If you have a general question about the Ada assignment, please post your question on the forum for the Ada assignment.  Please do <u>not</u> post your own code on the forum.
+  </b><b>
+</b><b>
+
+</b><script type="text/javascript" src="/d2l/common/math/MathML.js?v=20.21.9.32230 "></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() { D2LMathML.DesktopInit('https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=MML_HTMLorMML','https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML','130',true); });</script></body></html>
